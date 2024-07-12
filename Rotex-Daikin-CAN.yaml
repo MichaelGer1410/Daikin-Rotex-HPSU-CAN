@@ -687,6 +687,24 @@ sensor:
     accuracy_decimals: 0
 
   - platform: template
+    name: "Erzeugte Energie WW"
+    id: Erzeugte_Energie_WW
+    unit_of_measurement: "kWh"
+    icon: "mdi:thermometer-lines"
+    device_class: "ENERGY_STORAGE"
+    state_class: "measurement"
+    accuracy_decimals: 0
+
+  - platform: template
+    name: "Erzeugte Energie Heizung"
+    id: Erzeugte_Energie_Heizung
+    unit_of_measurement: "kWh"
+    icon: "mdi:thermometer-lines"
+    device_class: "ENERGY_STORAGE"
+    state_class: "measurement"
+    accuracy_decimals: 0
+
+  - platform: template
     name: "EHS fuer CH"
     id: Qchhp
     unit_of_measurement: "kWh"
@@ -981,6 +999,16 @@ interval:
               data: [0x31, 0x00, 0xFA, 0x09, 0x30, 0x00, 0x00]
               can_id: 0x680
           - delay: 500ms
+          #Energie_Heizung
+          - canbus.send:
+              data: [0x31, 0x00, 0xFA, 0x09, 0xA7, 0x00, 0x00]
+              can_id: 0x680
+          - delay: 500ms
+          #Energie_WW
+          - canbus.send:
+              data: [0x31, 0x00, 0xFA, 0x09, 0x2C, 0x00, 0x00]
+              can_id: 0x680
+          - delay: 500ms
           - canbus.send:
               data: [0x31, 0x00, 0x1C, 0x00, 0x00, 0x00, 0x00]
               can_id: 0x680
@@ -1100,7 +1128,25 @@ canbus:
              id(Erzeugte_Energie_Gesamt).publish_state(temperature);
              ESP_LOGD("main", "Temperature received over can is %f", temperature);
             }
+#Erzeugte Energie WW
+    - can_id: 0x180
+      then:
+        - lambda: |-
+            if(x[2]==0xFA and x[3]==0x09 and x[4] ==0x2C) {
+             float temperature =float((float((int((x[6])+( (x[5])<<8))))));
+             id(Erzeugte_Energie_WW).publish_state(temperature);
+             ESP_LOGD("main", "Temperature received over can is %f", temperature);
+            }
 
+#Erzeugte Energie Heizung
+    - can_id: 0x180
+      then:
+        - lambda: |-
+            if(x[2]==0xFA and x[3]==0x09 and x[4] ==0xA7) {
+             float temperature =float((float((int((x[6])+( (x[5])<<8))))));
+             id(Erzeugte_Energie_Heizung).publish_state(temperature);
+             ESP_LOGD("main", "Temperature received over can is %f", temperature);
+            }
 
 #Umwälzpumpe
     - can_id: 0x180
