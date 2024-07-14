@@ -40,8 +40,8 @@ web_server:
 
 
 wifi:
-  ssid: IoT
-  password: VeRoNiKa!!=)!))&
+  ssid: ssid
+  password: passwort
 
 
 # Optional manual IP
